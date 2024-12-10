@@ -1,13 +1,13 @@
-/** @type {import('next').NextConfig} */
-const path = require('path')
+import type { NextConfig } from 'next'
+import path from 'path'
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
-  webpack: (config) => {
+  webpack: (config: any) => {
     config.resolve.alias['@'] = path.resolve(__dirname, 'src')
     return config
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
 

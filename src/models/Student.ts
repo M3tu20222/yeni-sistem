@@ -1,8 +1,28 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { Grade } from './Grade';
 
-const studentSchema = new mongoose.Schema({
+interface IStudent extends Document {
+  studentNo: string;
+  name: string;
+  email: string;
+  password: string;
+  classId: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  gradeAverages: Map<string, number>;
+  overallAverage: number;
+  points: number;
+  badges: string[];
+  comparePassword: (candidatePassword: string) => Promise<boolean>;
+  calculateAverages: () => Promise<void>;
+}
+
+interface IStudentModel extends Model<IStudent> {
+  // Add any static methods here if needed
+}
+
+const studentSchema = new mongoose.Schema<IStudent>({
   studentNo: { 
     type: String, 
     required: true, 
@@ -37,7 +57,7 @@ const studentSchema = new mongoose.Schema({
   gradeAverages: {
     type: Map,
     of: Number,
-    default: {}
+    default: new Map()
   },
   overallAverage: {
     type: Number,
@@ -52,7 +72,6 @@ const studentSchema = new mongoose.Schema({
   }],
 });
 
-// Şifre hashleme
 studentSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
@@ -65,12 +84,11 @@ studentSchema.pre('save', async function(next) {
   }
 });
 
-// Şifre doğrulama metodu
-studentSchema.methods.comparePassword = async function(candidatePassword: string) {
+studentSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-studentSchema.methods.calculateAverages = async function() {
+studentSchema.methods.calculateAverages = async function(): Promise<void> {
   const grades = await Grade.find({ studentId: this._id });
   const courseAverages = new Map<string, { sum: number; count: number }>();
   let totalSum = 0;
@@ -90,13 +108,13 @@ studentSchema.methods.calculateAverages = async function() {
     }
   });
 
-  for (const [courseId, data] of courseAverages.entries()) {
+  courseAverages.forEach((data, courseId) => {
     this.gradeAverages.set(courseId, data.sum / data.count);
-  }
+  });
 
   this.overallAverage = totalCount > 0 ? totalSum / totalCount : 0;
   await this.save();
 };
 
-export const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
+export const Student = (mongoose.models.Student || mongoose.model<IStudent, IStudentModel>('Student', studentSchema)) as IStudentModel;
 
