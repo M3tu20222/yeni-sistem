@@ -76,13 +76,13 @@ export default function TeachersPage() {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await Promise.all([fetchTeachers(), fetchCourses(), fetchClasses()]);
-    };
-    fetchData();
-  }, []);
 
+useEffect(() => {
+  const fetchData = async () => {
+    await Promise.all([fetchTeachers(), fetchCourses(), fetchClasses()]);
+  };
+  fetchData();
+}, []);
   const fetchTeachers = async () => {
     try {
       const response = await fetch("/api/teachers");
@@ -105,7 +105,7 @@ export default function TeachersPage() {
       });
     }
   };
-
+ 
   const fetchCourses = async () => {
     try {
       const response = await fetch("/api/courses");
@@ -151,7 +151,7 @@ export default function TeachersPage() {
       });
     }
   };
-
+ 
   const onSubmit = async (data: TeacherForm) => {
     try {
       const url = editingTeacher
