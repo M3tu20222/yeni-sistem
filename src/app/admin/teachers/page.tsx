@@ -67,8 +67,6 @@ export default function TeachersPage() {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<TeacherForm>({
     resolver: zodResolver(teacherSchema),

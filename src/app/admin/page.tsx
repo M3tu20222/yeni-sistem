@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+//import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,7 +17,7 @@ interface Admin {
 export default function AdminPanel() {
   const [admins, setAdmins] = useState<Admin[]>([])
   const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'manager' })
-  const router = useRouter()
+  //const router = useRouter()
 
   useEffect(() => {
     fetchAdmins()
