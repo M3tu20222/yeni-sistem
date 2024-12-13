@@ -4,6 +4,20 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { clientPromise, connectToDatabase } from "@/lib/mongodb"
 import { compare } from "bcrypt"
 import {getServerSession} from "next-auth/next"
+import { Session } from "next-auth"
+import { JWT } from "next-auth/jwt"
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      role: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
 
 interface User {
   id: string;
@@ -101,10 +115,10 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
+        session.user.role = token.role as string;
+        session.user.id = token.id as string;
       }
       return session;
     },

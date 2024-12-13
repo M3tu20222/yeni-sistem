@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "@/components/ui/use-toast";
 import { ArrowLeft } from "lucide-react";
 import {
   LineChart,
@@ -39,7 +37,6 @@ interface CourseGradesProps {
 }
 
 export default function CourseGrades({
-  courseId,
   courseName,
   onBack,
   grades,

@@ -1,4 +1,11 @@
-import { LayoutDashboard, Users, GraduationCap, BookOpen, Settings, LogOut, Book } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BookOpen,
+  Settings,
+  Book,
+} from "lucide-react";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -10,4 +17,3 @@ const menuItems = [
 ];
 
 export default menuItems;
-

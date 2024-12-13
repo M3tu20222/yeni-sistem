@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
   SelectContent,
@@ -56,7 +56,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [autoGenerateCredentials, setAutoGenerateCredentials] = useState(false);
+  const { toast } = useToast();
 
   const {
     control,
@@ -76,8 +76,10 @@ export default function StudentsPage() {
   const watchAutoGenerate = watch("autoGenerateCredentials");
 
   useEffect(() => {
-    fetchStudents();
-    fetchClasses();
+    const fetchData = async () => {
+      await Promise.all([fetchStudents(), fetchClasses()]);
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -169,7 +171,6 @@ export default function StudentsPage() {
           autoGenerateCredentials: false,
         });
         setEditingStudent(null);
-        setAutoGenerateCredentials(false);
       } else {
         toast({
           title: "Hata",
@@ -237,17 +238,6 @@ export default function StudentsPage() {
       classId: student.classId,
       autoGenerateCredentials: false,
     });
-    setAutoGenerateCredentials(false);
-  };
-
-  const generateRandomPassword = () => {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    let password = "";
-    for (let i = 0; i < 10; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
   };
 
   const generateEmailFromName = (name: string, studentNo: string) => {
@@ -275,17 +265,16 @@ export default function StudentsPage() {
     const words = normalizedName.split(/\s+/);
     const emailPrefix = words.map((word) => word.slice(0, 2)).join("");
 
-    const email = `${emailPrefix}.${studentNo}@24agustos.com`;
-    return email;
+    return `${emailPrefix}.${studentNo}@24agustos.com`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
       <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink text-transparent bg-clip-text">
         Öğrenci Yönetimi
       </h1>
 
-      <Card className="mb-8 border-2 border-neon-purple bg-slate-800/50">
+      <Card className="mb-8 border-2 border-neon-purple bg-slate-800/50 shadow-lg shadow-neon-purple/20">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-neon-blue">
             {editingStudent ? "Öğrenci Düzenle" : "Yeni Öğrenci Ekle"}
@@ -300,7 +289,7 @@ export default function StudentsPage() {
               <Input
                 id="studentNo"
                 {...register("studentNo")}
-                className="bg-slate-700 border-neon-blue"
+                className="bg-slate-700 border-neon-blue text-white"
               />
               {errors.studentNo && (
                 <p className="text-red-500">{errors.studentNo.message}</p>
@@ -313,7 +302,7 @@ export default function StudentsPage() {
               <Input
                 id="name"
                 {...register("name")}
-                className="bg-slate-700 border-neon-blue"
+                className="bg-slate-700 border-neon-blue text-white"
               />
               {errors.name && (
                 <p className="text-red-500">{errors.name.message}</p>
@@ -324,7 +313,6 @@ export default function StudentsPage() {
                 id="autoGenerateCredentials"
                 {...register("autoGenerateCredentials")}
                 onCheckedChange={(checked) => {
-                  setAutoGenerateCredentials(checked as boolean);
                   setValue("autoGenerateCredentials", checked as boolean);
                 }}
               />
@@ -343,7 +331,7 @@ export default function StudentsPage() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className="bg-slate-700 border-neon-blue"
+                className="bg-slate-700 border-neon-blue text-white"
                 disabled={watchAutoGenerate}
               />
               {errors.email && (
@@ -359,7 +347,7 @@ export default function StudentsPage() {
                   id="password"
                   type="password"
                   {...register("password")}
-                  className="bg-slate-700 border-neon-blue"
+                  className="bg-slate-700 border-neon-blue text-white"
                   disabled={watchAutoGenerate}
                 />
                 {errors.password && (
@@ -412,7 +400,7 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-2 border-neon-blue bg-slate-800/50">
+      <Card className="border-2 border-neon-blue bg-slate-800/50 shadow-lg shadow-neon-blue/20">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-neon-pink">
             Öğrenci Listesi
@@ -435,13 +423,20 @@ export default function StudentsPage() {
                   (c) => c._id === student.classId
                 );
                 return (
-                  <TableRow key={student._id}>
-                    <TableCell className="font-medium">
+                  <TableRow
+                    key={student._id}
+                    className="border-b border-slate-700"
+                  >
+                    <TableCell className="font-medium text-neon-blue">
                       {student.studentNo}
                     </TableCell>
-                    <TableCell>{student.name}</TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-neon-purple">
+                      {student.name}
+                    </TableCell>
+                    <TableCell className="text-neon-yellow">
+                      {student.email}
+                    </TableCell>
+                    <TableCell className="text-neon-green">
                       {studentClass
                         ? `${studentClass.grade}-${studentClass.section}`
                         : "N/A"}

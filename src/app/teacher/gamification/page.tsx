@@ -38,7 +38,7 @@ interface Badge {
 }
 
 export default function TeacherGamificationPage() {
-  const { data: session } = useSession();
+  useSession();
   const [students, setStudents] = useState<Student[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string>("");

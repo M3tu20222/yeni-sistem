@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,14 +27,7 @@ export default function StudentProfilePage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [badges, setBadges] = useState<BadgeType[]>([]);
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchProfile();
-      fetchBadges();
-    }
-  }, [session]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await fetch(`/api/students/${session?.user?.id}`);
       if (response.ok) {
@@ -55,9 +48,9 @@ export default function StudentProfilePage() {
         variant: "destructive",
       });
     }
-  };
+  }, [session?.user?.id]);
 
-  const fetchBadges = async () => {
+  const fetchBadges = useCallback(async () => {
     try {
       const response = await fetch("/api/badges");
       if (response.ok) {
@@ -78,7 +71,14 @@ export default function StudentProfilePage() {
         variant: "destructive",
       });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchProfile();
+      fetchBadges();
+    }
+  }, [session?.user?.id, fetchProfile, fetchBadges]);
 
   if (!profile) {
     return <div>Yükleniyor...</div>;

@@ -24,7 +24,7 @@ interface Homework {
 }
 
 export default function StudentHomeworkPage() {
-  const { data: session } = useSession();
+  useSession();
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
 
   useEffect(() => {

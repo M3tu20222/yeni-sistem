@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,7 +43,7 @@ export default function ClassesPage() {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [sortField, setSortField] = useState<SortField>("grade");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const { toast } = useToast();
+  
 
   const {
     register,
@@ -53,18 +53,11 @@ export default function ClassesPage() {
   } = useForm<ClassForm>({
     resolver: zodResolver(classSchema),
   });
+const { toast } = useToast();
 
-  useEffect(() => {
-    fetchClasses();
-  }, []);
-
-  const fetchClasses = async () => {
-    const response = await fetch("/api/classes", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+const fetchClasses = useCallback(async () => {
+  try {
+    const response = await fetch("/api/classes");
     if (response.ok) {
       const data = await response.json();
       setClasses(data);
@@ -75,7 +68,20 @@ export default function ClassesPage() {
         variant: "destructive",
       });
     }
-  };
+  } catch (error) {
+    console.error("Sınıflar yüklenirken hata:", error);
+    toast({
+      title: "Hata",
+      description: "Sınıflar yüklenirken bir hata oluştu.",
+      variant: "destructive",
+    });
+  }
+}, [toast]);
+
+useEffect(() => {
+  fetchClasses();
+}, [fetchClasses]);
+
 
   const onSubmit = async (data: ClassForm) => {
     const url = editingClass ? `/api/classes` : "/api/classes";

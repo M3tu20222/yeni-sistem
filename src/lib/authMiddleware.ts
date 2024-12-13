@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-interface DecodedToken {
+interface DecodedToken extends JwtPayload {
   id: string;
   username: string;
   role: string;
 }
 
-export function authMiddleware(handler: (req: NextRequest) => Promise<NextResponse>) {
+interface RequestWithUser extends NextRequest {
+  user?: DecodedToken;
+}
+
+export function authMiddleware(handler: (req: RequestWithUser) => Promise<NextResponse>) {
   return async (req: NextRequest) => {
     const authHeader = req.headers.get('Authorization');
 
@@ -25,10 +29,10 @@ export function authMiddleware(handler: (req: NextRequest) => Promise<NextRespon
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
       
       // Kullanıcı bilgilerini request nesnesine ekle
-      (req as any).user = decoded;
+      (req as RequestWithUser).user = decoded;
 
       // Orijinal handler'ı çağır
-      return handler(req);
+      return handler(req as RequestWithUser);
     } catch (error) {
       console.error('Token doğrulama hatası:', error);
       return new NextResponse(
@@ -40,11 +44,11 @@ export function authMiddleware(handler: (req: NextRequest) => Promise<NextRespon
 }
 
 // Süper admin kontrolü için yardımcı fonksiyon
-export function isSuperAdmin(handler: (req: NextRequest) => Promise<NextResponse>) {
-  return authMiddleware(async (req: NextRequest) => {
-    const user = (req as any).user;
+export function isSuperAdmin(handler: (req: RequestWithUser) => Promise<NextResponse>) {
+  return authMiddleware(async (req: RequestWithUser) => {
+    const user = req.user;
     
-    if (user.role !== 'super') {
+    if (user?.role !== 'super') {
       return new NextResponse(
         JSON.stringify({ error: '⚡ Yetersiz yetki: Sadece süper adminler erişebilir' }),
         { status: 403, headers: { 'Content-Type': 'application/json' } }

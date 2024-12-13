@@ -55,7 +55,7 @@ interface Class {
 }
 
 export default function AddGradePage() {
-  const { data: session } = useSession();
+  useSession();
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>("");

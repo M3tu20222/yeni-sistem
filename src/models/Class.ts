@@ -1,17 +1,30 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+interface StudentGrade {
+  courseId: string;
+  value: number;
+}
+
+interface StudentWithGrades {
+  grades?: StudentGrade[];
+}
+
 export interface IClass extends Document {
   name: string;
   teacher: string;
-  students: string[];
+  students: mongoose.Types.ObjectId[];
+  grade: number;
+  section: string;
   courseAverages: Map<string, number>;
-  calculateCourseAverages: () => void;
+  calculateCourseAverages: () => Promise<void>;
 }
 
-const ClassSchema: Schema = new Schema({
+const ClassSchema: Schema = new Schema<IClass>({
   name: { type: String, required: true },
   teacher: { type: String, required: true },
   students: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
+  grade: { type: Number, required: true },
+  section: { type: String, required: true },
   courseAverages: {
     type: Map,
     of: Number,
@@ -19,25 +32,35 @@ const ClassSchema: Schema = new Schema({
   }
 });
 
-ClassSchema.methods.calculateCourseAverages = function() {
+ClassSchema.methods.calculateCourseAverages = async function() {
   const courseAverages = new Map<string, { sum: number; count: number }>();
 
-  this.students.forEach((student: any) => {
-    student.grades.forEach((grade: { course: string; score: number }) => {
-      if (!courseAverages.has(grade.course)) {
-        courseAverages.set(grade.course, { sum: 0, count: 0 });
-      }
-      const data = courseAverages.get(grade.course)!;
-      data.sum += grade.score;
-      data.count += 1;
-    });
+  // Fetch and populate the students with their grades
+  await this.populate({
+    path: 'students',
+    select: 'grades'
+  });
+
+  this.students.forEach((student: StudentWithGrades) => {
+    if (student.grades && Array.isArray(student.grades)) {
+      student.grades.forEach((grade: StudentGrade) => {
+        if (!courseAverages.has(grade.courseId)) {
+          courseAverages.set(grade.courseId, { sum: 0, count: 0 });
+        }
+        const data = courseAverages.get(grade.courseId)!;
+        data.sum += grade.value;
+        data.count += 1;
+      });
+    }
   });
 
   this.courseAverages.clear();
   courseAverages.forEach((data, courseId) => {
     this.courseAverages.set(courseId, data.sum / data.count);
   });
+
+  await this.save();
 };
 
-export default mongoose.models.Class || mongoose.model<IClass>('Class', ClassSchema);
+export const Class = mongoose.models.Class || mongoose.model<IClass>('Class', ClassSchema);
 

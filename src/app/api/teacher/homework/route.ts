@@ -12,10 +12,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { db } = await connectToDatabase()
+    await connectToDatabase()
     const teacherId = new ObjectId(session.user.id)
 
-    const homeworks = await db.collection('homeworks').aggregate([
+    const homeworks = await Homework.aggregate([
       { $match: { teacherId } },
       {
         $lookup: {
@@ -38,7 +38,7 @@ export async function GET() {
           className: { $concat: [{ $toString: '$class.grade' }, '-', '$class.section'] }
         }
       }
-    ]).toArray()
+    ])
 
     return NextResponse.json(homeworks)
   } catch (error) {
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { db } = await connectToDatabase()
+    await connectToDatabase()
     const { title, description, classId, dueDate } = await request.json()
 
     const newHomework = new Homework({

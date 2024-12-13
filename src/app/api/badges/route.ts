@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { db } = await connectToDatabase()
+    await connectToDatabase()
     const badgeData = await request.json()
 
     const newBadge = new Badge(badgeData)
@@ -37,7 +37,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Rozet başarıyla oluşturuldu', badge: newBadge }, { status: 201 })
   } catch (error) {
     console.error('Rozet oluşturulurken hata:', error)
-    return NextResponse.json({ error: 'Rozet oluşturulurken bir hata oluştu.' }, { status: 500 })
+    if (error instanceof Error) {
+      return NextResponse.json({ error: `Rozet oluşturulurken bir hata oluştu: ${error.message}` }, { status: 500 })
+    }
+    return NextResponse.json({ error: 'Rozet oluşturulurken bilinmeyen bir hata oluştu.' }, { status: 500 })
   }
 }
 

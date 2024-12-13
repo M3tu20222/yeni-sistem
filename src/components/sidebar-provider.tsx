@@ -13,7 +13,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   SidebarProvider as ShadcnSidebarProvider,
   SidebarInset,
 } from "@/components/ui/sidebar";
@@ -22,14 +21,12 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  Settings,
   LogOut,
   Book,
   UserCircle,
   ClipboardList,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 
 const menuItems = {
@@ -56,7 +53,6 @@ const menuItems = {
 export function AppSidebar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {

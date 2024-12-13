@@ -58,7 +58,7 @@ interface Class {
 }
 
 export default function TeacherHomeworkPage() {
-  const { data: session } = useSession();
+  useSession();
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
 

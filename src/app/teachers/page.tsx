@@ -68,8 +68,6 @@ export default function TeachersPage() {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<TeacherForm>({
     resolver: zodResolver(teacherSchema),
@@ -79,9 +77,10 @@ export default function TeachersPage() {
   });
 
   useEffect(() => {
-    fetchTeachers();
-    fetchCourses();
-    fetchClasses();
+    const fetchData = async () => {
+      await Promise.all([fetchTeachers(), fetchCourses(), fetchClasses()]);
+    };
+    fetchData();
   }, []);
 
   const fetchTeachers = async () => {

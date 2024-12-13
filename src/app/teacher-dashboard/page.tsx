@@ -1,49 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "@/components/ui/use-toast"
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "@/components/ui/use-toast";
 
 interface Class {
-  _id: string
-  grade: number
-  section: string
+  _id: string;
+  grade: number;
+  section: string;
 }
 
 export default function TeacherDashboardPage() {
-  const { data: session } = useSession()
-  const [classes, setClasses] = useState<Class[]>([])
+  const { data: session } = useSession();
+  const [classes, setClasses] = useState<Class[]>([]);
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchTeacherClasses()
-    }
-  }, [session])
-
-  const fetchTeacherClasses = async () => {
+  const fetchTeacherClasses = useCallback(async () => {
     try {
-      const response = await fetch(`/api/teachers/${session?.user?.id}/classes`)
+      const response = await fetch(
+        `/api/teachers/${session?.user?.id}/classes`
+      );
       if (response.ok) {
-        const data = await response.json()
-        setClasses(data)
+        const data = await response.json();
+        setClasses(data);
       } else {
         toast({
           title: "Hata",
           description: "Sınıflar yüklenirken bir hata oluştu.",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error('Sınıflar yüklenirken hata:', error)
+      console.error("Sınıflar yüklenirken hata:", error);
       toast({
         title: "Hata",
         description: "Sınıflar yüklenirken bir hata oluştu.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchTeacherClasses();
+    }
+  }, [session?.user?.id, fetchTeacherClasses]);
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
@@ -53,7 +62,9 @@ export default function TeacherDashboardPage() {
 
       <Card className="border-2 border-neon-blue bg-slate-800/50">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-neon-pink">Sınıflarım</CardTitle>
+          <CardTitle className="text-2xl font-bold text-neon-pink">
+            Sınıflarım
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -66,7 +77,9 @@ export default function TeacherDashboardPage() {
             <TableBody>
               {classes.map((classItem) => (
                 <TableRow key={classItem._id}>
-                  <TableCell className="font-medium">{classItem.grade}</TableCell>
+                  <TableCell className="font-medium">
+                    {classItem.grade}
+                  </TableCell>
                   <TableCell>{classItem.section}</TableCell>
                 </TableRow>
               ))}
@@ -75,6 +88,5 @@ export default function TeacherDashboardPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

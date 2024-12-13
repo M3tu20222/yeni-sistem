@@ -17,7 +17,12 @@ export async function GET(request: Request) {
 
     const { db } = await connectToDatabase()
     
-    let query: any = {}
+    const query: {
+      classId?: ObjectId;
+      courseId?: ObjectId;
+      teacherId?: ObjectId;
+    } = {}
+
     if (classId) query.classId = new ObjectId(classId)
     if (courseId) query.courseId = new ObjectId(courseId)
     if (session.user.role === 'teacher') query.teacherId = new ObjectId(session.user.id)

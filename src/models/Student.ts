@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { Grade } from './Grade';
 
@@ -16,10 +16,6 @@ interface IStudent extends Document {
   badges: string[];
   comparePassword: (candidatePassword: string) => Promise<boolean>;
   calculateAverages: () => Promise<void>;
-}
-
-interface IStudentModel extends Model<IStudent> {
-  // Add any static methods here if needed
 }
 
 const studentSchema = new mongoose.Schema<IStudent>({
@@ -79,8 +75,8 @@ studentSchema.pre('save', async function(next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (error) {
+    next(error as Error);
   }
 });
 
@@ -94,7 +90,7 @@ studentSchema.methods.calculateAverages = async function(): Promise<void> {
   let totalSum = 0;
   let totalCount = 0;
 
-  grades.forEach((grade: any) => {
+  grades.forEach((grade: { courseId: mongoose.Types.ObjectId; value: number }) => {
     const courseId = grade.courseId.toString();
     if (!courseAverages.has(courseId)) {
       courseAverages.set(courseId, { sum: 0, count: 0 });
@@ -116,5 +112,5 @@ studentSchema.methods.calculateAverages = async function(): Promise<void> {
   await this.save();
 };
 
-export const Student = (mongoose.models.Student || mongoose.model<IStudent, IStudentModel>('Student', studentSchema)) as IStudentModel;
+export const Student = mongoose.model<IStudent>('Student', studentSchema);
 

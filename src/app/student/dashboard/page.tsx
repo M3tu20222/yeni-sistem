@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { BookOpen } from "lucide-react";
 import CourseList from "@/components/student/CourseList";
@@ -22,7 +21,7 @@ interface Grade {
 }
 
 export default function StudentDashboard() {
-  const { data: session } = useSession();
+  useSession();
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [grades, setGrades] = useState<Grade[]>([]);
